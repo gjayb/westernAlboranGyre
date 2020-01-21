@@ -1,0 +1,38 @@
+# =====================================================================
+# | Parameters for Bulk Formula Package 
+# =====================================================================
+ &BULKF_CONST
+ &
+
+ &BULKF_PARM01 
+# blk_nIter=,
+ calcWindStress=.TRUE.,
+# blk_taveFreq=,
+#-- Air temperature (K)--
+ AirTempFile='./air_temperature_2m', 
+#-- Specific humidity at surface (kg/kg)--
+ AirHumidityFile='./forcing/specific_humidity',
+#-- Total precipitation (= rain + snow) (m/s), (>0: rain) --
+ RainFile='./forcing/prate_mxseg',  
+ SolarFile='./forcing/dswrf',     
+ LongwaveFile='./forcing/dlwrf', 
+ UWindFile='./forcing/wind_u', 
+ VWindFile='./forcing/wind_v',  
+#-- Freshwater runoff (m/s)--
+# RunoffFile=' ',  
+# WSpeedFile='./forcing/wind_mod',
+#-- Net heat flux (cheating)-- 
+# QnetFile=' ',
+# --E-P (cheating)-- 
+# EmPFile=' ',  
+# --Fraction sky covered in cloud--
+# CloudFile=' ', 
+ externForcingPeriod_Atm=21600.,
+# Some large amount to avoid periodicity
+ externForcingCycle_Atm=8071920000.,
+ &
+
+ &BULKF_PARM02
+ &
+
+

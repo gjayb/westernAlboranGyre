@@ -1,0 +1,74 @@
+# Open-boundaries
+ &OBCS_PARM01  
+ OB_Ieast=1*0,198*-1,1*0,
+ OB_Iwest=1*0,198*1,1*0,
+# OB_Jnorth=0*700,
+# OB_Jsouth=0*700,
+# Velocity baroclinic nesting model
+ OBWuFile='./forcing/u_w_full2',
+ OBEuFile='./forcing/u_e_full2',
+ OBWvFile='./forcing/v_w_full2',
+ OBEvFile='./forcing/v_e_full2',
+#--------------------------------------
+# Sal./Temp. baroclinic nesting model
+ OBWsFile='./forcing/sal_w_full',
+ OBEsFile='./forcing/sal_e_full',
+ OBWtFile='./forcing/theta_w_full',
+ OBEtFile='./forcing/theta_e_full',
+#--------------------------------------
+# Tidal constituents files
+# OBWuTidFile='OBWuTidFile96.tid',
+# OBEuTidFile='OBEuTidFile96.tid',
+# OBWvTidFile='OBWvTidFile96.tid',
+# OBEvTidFile='OBEvTidFile96.tid',
+#--------------------------------------
+# Storm Surge input files   
+# OBWuNivFile='OBWuNiv.obc',
+# OBEuNivFile='OBEuNiv.obc',
+#-------------------------------------
+# Ptracers files OBCS
+#-------------------------------------
+# Tidal periods is sec. Order:
+# Q1, O1, P1, K1, N2, M2, S2, K2
+ tidalPeriod(1)=96726.060,
+ tidalPeriod(2)=92949.619,
+ tidalPeriod(3)=86637.196,
+ tidalPeriod(4)=86164.099,
+ tidalPeriod(5)=45570.051,
+ tidalPeriod(6)=44714.164,
+ tidalPeriod(7)=43200.000,
+ tidalPeriod(8)=43082.050,
+#-------------------------------------
+ useOBCSprescribe=.TRUE.,
+ useOBCSsponge=.TRUE.,
+ useOBCSbalance=.TRUE.,
+ OBCS_balanceFacE=-1.,
+ OBCS_balanceFacW=-1.,
+ useOBCStides=.FALSE.,
+ useNivmar=.FALSE.,
+ &
+
+# Orlanski parameters
+ &OBCS_PARM02
+#Cmax=0.45,
+#cVelTimeScale=1000.,
+ &
+# *****************************************
+# Sponge Layer Parameters.
+# *****************************************
+ &OBCS_PARM03
+ Urelaxobcsinner=4500.,
+ Urelaxobcsbound=2700.,
+ Vrelaxobcsinner=4500.,
+ Vrelaxobcsbound=2700./
+ spongeThickness=80,
+ &
+
+ &OBCS_PARM04
+# TrelaxStevens=864.,
+# SrelaxStevens=864.,
+# useStevensPhaseVel=.FALSE.,
+# useStevensAdvection=.TRUE.,
+ &
+         
+

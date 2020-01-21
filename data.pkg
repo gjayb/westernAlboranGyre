@@ -1,0 +1,10 @@
+# Packages
+ &PACKAGES
+ usePP81=.FALSE.,
+ useKPP=.TRUE.,
+ useBulkForce=.FALSE., 
+ useOBCS=.TRUE.,
+ useDiagnostics=.TRUE.,
+ useCAL=.TRUE.,
+ useEXF=.TRUE.
+ &

@@ -1,0 +1,99 @@
+
+# ====================
+# | Model parameters |
+# ====================
+#
+# Continuous equation parameters
+ &PARM01
+ tRef=46*3.0,
+ sRef=46*34., 
+ viscC4Smag=2.5,
+ viscA4GridMax=0.5, 
+ viscAz=1.E-5,
+ no_slip_sides=.TRUE.,
+ no_slip_bottom=.TRUE.,
+ diffKhT=1.E-9,
+ diffKzT=1.E-5,
+ diffKhS=1.E-9,
+ diffKzS=1.E-5,
+ rigidLid=.FALSE.,
+ implicitFreeSurface=.TRUE.,
+ implicitDiffusion=.TRUE.,
+ implicitViscosity=.TRUE.,
+ eosType = 'JMD95Z',
+ staggerTimeStep = .TRUE.
+ tempAdvScheme = 33,
+ saltAdvScheme = 33,
+# eosType='LINEAR',
+# hFacMin=0.2,
+# turn on looped cells
+#--------------------
+# hFacMindr=30.,
+  vectorInvariantMomentum=.TRUE.,
+#-------------------
+ nonHydrostatic=.FALSE.,
+ readBinaryPrec=32,
+ useSingleCpuIO=.TRUE.,
+ NonLinFreeSurf=0,
+ globalFiles=.TRUE.,
+ bottomDragQuadratic=2.E-3,
+ hFacInf=0.2,
+ hFacSup=2.0,
+ exactConserv=.TRUE.,
+ balanceEmPmR=.TRUE.,
+# debuglevel=-1,
+ &
+
+# Elliptic solver parameters
+ &PARM02
+ cg2dMaxIters=300,
+# cg2dTargetResidual=1.E-13,
+ cg2dTargetResWunit=1.E-14,
+ cg3dMaxIters=20,
+ cg3dTargetResidual=1.E-8,
+ &
+
+# Time stepping parameters
+ &PARM03
+ niter0=3551040,
+ nTimeSteps=864000,
+ deltaT=10.,
+ abEps=0.01,
+ pChkptFreq=86400.,
+ pickupStrictlyMatch=.FALSE.,
+ chkptFreq=21600.,
+ dumpFreq=0.,
+ monitorFreq=240.,
+ periodicExternalForcing=.TRUE.,
+ externForcingPeriod=2592000.,
+ externForcingCycle=311040000.,
+# Added parameters (jc)
+# dia0=734593.,
+# LATcn=36.,
+# Select_Rampa=.TRUE.,
+# DtRampa now in secs. (12 days = 1036800.)
+# DtRampa=1036800.,
+# externForcingPeriod_Niv=900.,
+# externForcingCycle_Niv=10541700.,
+ &
+
+# Gridding parameters
+ &PARM04
+ usingCartesianGrid=.FALSE.,
+ usingSphericalPolarGrid=.FALSE.,
+ usingCurvilinearGrid =.TRUE.,
+ delZ=5.,6.,6.,7.,7.,8.,9.,10.,11.,12.,13.,15.,16.,18.,20.,22.,24.,26.,29.,32.,
+      35.,39.,43.,47.,52.,57.,63.,70.,77.,85.,93.,103.,113.,125.,138.,152.,167.,185.,204.,
+      224.,247.,273.,301.,331.,365.,403.
+ &
+
+# Input datasets
+ &PARM05
+ bathyFile='bathy_MITgcm700x200.bin',
+ hydrogSaltFile='./sal_ini_combo2',
+ hydrogThetaFile='./theta_ini_combo2',
+ uVelInitFile='./u_ini_jose',
+ vVelInitFile='./v_ini_jose',
+ pSurfInitFile='./ssh_ini_jose',
+ &
+

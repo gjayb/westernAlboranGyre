@@ -1,0 +1,181 @@
+#
+# *********************
+# External Forcing Data
+# *********************
+ &EXF_NML_01
+ exf_iprec         = 32,
+#exf_verbose       = .TRUE.,
+ &
+
+# *********************
+ &EXF_NML_02
+ hfluxstartdate1=20071031,
+ hfluxstartdate2=000000,
+ hfluxperiod=43200.0,
+#
+ sfluxstartdate1=20071031,
+ sfluxstartdate2=000000,
+ sfluxperiod=43200.0,
+#
+# hsstartdate1=20070930,
+# hsstartdate2=000000,
+# hsperiod=2592000.0,
+#
+# hlstartdate1=20070930,
+# hlstartdate2=000000,
+# hlperiod=2592000.0,
+#
+ swdownstartdate1=20070930,
+ swdownstartdate2=000000,
+ swdownperiod=2592000.0,
+#
+ lwdownstartdate1=20070930,
+ lwdownstartdate2=000000,
+ lwdownperiod=2592000.0,
+#
+ ustressstartdate1=20071031,
+ ustressstartdate2=000000,
+ ustressperiod=21600.0,
+#
+ vstressstartdate1=20071031,
+ vstressstartdate2=000000,
+ vstressperiod=21600.0,
+#
+ atempstartdate1=20070930,
+ atempstartdate2=000000,
+ atempperiod=2592000.0,
+#
+ aqhstartdate1=20070930,
+ aqhstartdate2=000000,
+ aqhperiod=2592000.0,
+#
+# climsststartdate1  = 19920101,
+# climsststartdate2  = 000000,
+# climsstperiod      = 2592000.0,
+# 2 months restoring timescale for temperature
+# climsstTauRelax         = 5184000.0,
+#
+# climsssstartdate1  = 19920101,
+# climsssstartdate2  = 000000,
+# climsssperiod      = 2592000.0,
+# 6 months restoring timescale for salinity
+# climsssTauRelax         = 15552000.0,
+#
+  hfluxfile    = 'forcing/hfluxFull',
+# hsfile = 'forcing/sensibleFall2007',
+# hlfile = 'forcing/latentFall2007',
+# swdownfile = 'forcing/shortwaveFall2007',
+# lwdownfile = 'forcing/longwaveFall2007',
+# aqhfile = 'forcing/sfluxZero10',
+ sfluxfile    = 'forcing/sfluxFull',
+ ustressfile  = 'forcing/tauE_full',
+ vstressfile  = 'forcing/tauN_full',
+# atempfile  = 'forcing/airTFall2007',
+# climsstfile  = 'lev_s.bin',
+# climsssfile  = 'lev_sss.bin',
+#
+ &
+
+# *********************
+ &EXF_NML_03
+ &
+
+# *********************
+ &EXF_NML_04
+ hflux_lon0    = -10.5,
+ hflux_lon_inc = 0.75,
+ hflux_lat0    = 31.5,
+ hflux_lat_inc = 12*0.75,
+ hflux_nlon    = 18,
+ hflux_nlat    = 13,
+#
+ sflux_lon0    = -10.5,
+ sflux_lon_inc = 0.75,
+ sflux_lat0    = 31.5,
+ sflux_lat_inc = 12*0.75,
+ sflux_nlon    = 18,
+ sflux_nlat    = 13,
+#
+# hs_lon0 = -10.5,
+# hs_lon_inc = 0.75,
+# hs_lat0 = 31.5,
+# hs_lat_inc = 12*0.75,
+# hs_nlon = 18,
+# hs_nlat = 13,
+#
+# hl_lon0 = -10.5,
+# hl_lon_inc = 0.75,
+# hl_lat0 = 31.5,
+# hl_lat_inc = 12*0.75,
+# hl_nlon = 18,
+# hl_nlat = 13,
+#
+ swdown_lon0 = -10.5,
+ swdown_lon_inc = 0.75,
+ swdown_lat0 = 31.5,
+ swdown_lat_inc = 12*0.75,
+ swdown_nlon = 18,
+ swdown_nlat = 13,
+#
+ lwdown_lon0 = -10.5,
+ lwdown_lon_inc = 0.75,
+ lwdown_lat0 = 31.5,
+ lwdown_lat_inc = 12*0.75,
+ lwdown_nlon = 18,
+ lwdown_nlat = 13,
+#
+ ustress_lon0    = -10.1250,
+ ustress_lon_inc = 0.25,
+ ustress_lat0    = 31.875,
+ ustress_lat_inc = 32*0.25,
+ ustress_nlon    = 49,
+ ustress_nlat    = 33,
+#
+ vstress_lon0    = -10.125,
+ vstress_lon_inc = 0.25,
+ vstress_lat0    = 31.875,
+ vstress_lat_inc = 32*0.25,
+ vstress_nlon    = 49,
+ vstress_nlat    = 33,
+#
+ atemp_lon0 = -10.5,
+ atemp_lon_inc = 0.75,
+ atemp_lat0 = 31.5,
+ atemp_lat_inc = 12*0.75, 
+ atemp_nlon = 18,
+ atemp_nlat = 13,
+#
+ aqh_lon0 = -10.5,
+ aqh_lon_inc = 0.75,
+ aqh_lat0 = 31.5,
+ aqh_lat_inc = 12*0.75,
+ aqh_nlon = 18,
+ aqh_nlat = 13,
+#
+# climsst_lon0    = 2
+# climsst_lon_inc = 4
+# climsst_lat0    = -78
+# climsst_lat_inc = 39*4
+# climsst_nlon    = 90
+# climsst_nlat    = 40
+#
+# climsss_lon0    = 2
+# climsss_lon_inc = 4
+# climsss_lat0    = -78
+# climsss_lat_inc = 39*4
+# climsss_nlon    = 90
+# climsss_nlat    = 40
+#
+ &
+ &EXF_NML_OBCS
+# obcs
+ obcsEstartdate1 = 20071031,
+ obcsEstartdate2 = 000000,
+ obcsEperiod = 86400.0,
+#
+ obcsWstartdate1 = 20071031,
+ obcsWstartdate2 = 000000,
+ obcsWperiod = 86400.0,
+#
+ &
+
