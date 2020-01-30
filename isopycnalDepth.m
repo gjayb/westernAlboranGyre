@@ -7,8 +7,11 @@ load('geometrySpinupSteady.mat')
 size(Sigma)
 %%
 dBin=0.5.*dInterface(1:end-1)+0.5.*dInterface(2:end);
+isopycs=[];
+isoStr=['263','265'];
 %depths1=[2.5 3:dBin(end)];
-    isopyc=26.75; %potential density
+for iiso=1:10
+    isopyc=isopycs(iiso); %potential density
     nt=162;
     isoDepth=zeros([700 200 nt]);
 %%    
@@ -38,4 +41,6 @@ dBin=0.5.*dInterface(1:end-1)+0.5.*dInterface(2:end);
     
 %figure; pcolor(XC,YC,mean(isoDepth,3)); shading 'flat'
 %figure; pcolor(XC,YC,std(isoDepth,0,3)); shading 'flat'
-save('iso2675depthNRsnap.mat','isoDepth')
+fn=strcat('iso',isoStr(iiso),'depthNFsnap.mat')
+save(fn,'isoDepth')
+end

@@ -1,9 +1,7 @@
-load('geometrySpinupSteady.mat');
-%clear Urot Vrot
-load('uvwDailyDepth1rotatedNF.mat');
-u1=Urot; v1=Vrot; 
-load('uvwDailyNativeNF.mat','W');
-w1=squeeze(W(:,:,1,:)); clear W
+load('uvHdays10to30depth1.mat');
+clear Urot Vrot
+load('uvwNativeGridIsoDepth29.mat');
+u1=uIso; v1=vIso; w1=wIso;
 
 %u1=squeeze(Urot);
 %v1=squeeze(Vrot);
@@ -31,7 +29,6 @@ NX=150; NY=90;
     
 xvel2=(XC-xmin*ones(size(XC))).*111000.*cosd(YC); 
 yvel2=(YC-ymin*ones(size(YC))).*111000;
-%SHOULD have XU,YU for u and XV,YV for v, w uses *C 
 
 xvel=min(min(xvel2)):1000:max(max(xvel2));
 yvel=min(min(yvel2)):1000:max(max(yvel2));
@@ -47,12 +44,12 @@ for k=1:length(tvel)
    w3(:,:,k)=griddata(xvel2,yvel2,w1(:,:,k),xvelg,yvelg);
 end
 u=u3; v=v3; w=w3;
-clear Urot Vrot W u1 v1 u2 v2 u3 v3 w1 w3 
+clear Urot Vrot u1 v1 u2 v2 u3 v3 w1 w3 
 %u=repmat(u3,[1 1 32]);
 %v=repmat(v3,[1 1 32]);
 
 z0=[xinM(:)';yinM(:)'];
 
 %fn='uvHdepth1interpolated2.mat';
-fn='uvwDailyDepth1interpolatedNF.mat';
+fn='uvwIso29interpolated.mat';
 save(fn,'-v7.3');

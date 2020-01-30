@@ -1,11 +1,40 @@
 %based on wagMomentumBudget, eulerian vorticity budget, circulation
 %integral- circulation is int(u*ds)=int(nabla cross u)dA=int(vort)dA
 %surface only
+%% load
+% times=(110*8640):8640:(148*8640)
+% nt=length(times)
+% Utend=rdmds('Utend',times);
+% sizeUtend=size(Utend)
+% Vtend=rdmds('Vtend',times);
+% UDiss=rdmds('UDiss',times);
+% VDiss=rdmds('VDiss',times);
+% AdvU=rdmds('AdvU',times);
+% AdvV=rdmds('AdvV',times);
+% UCori=rdmds('UCori',times);
+% VCori=rdmds('VCori',times);
+% UdPdx=rdmds('UdPdx',times);
+% VdPdy=rdmds('VdPdy',times);
+% Uext=rdmds('Uext',times);
+% Vext=rdmds('Vext',times);
+% VisZU=rdmds('ViscZiU',times);
+% VisZV=rdmds('ViscZiV',times);
+% 
+% SSH=rdmds('SSHave',times);
+% AbU=rdmds('ABU',times);
+% AbV=rdmds('ABV',times);
+% Usnap=rdmds('U',times);
+% Vsnap=rdmds('V',times);
+% times2=1334880:8640:1395360; %vort
+% vortSnap=rdmds('VORT',times2);
+% TauEa=rdmds('TAUXave',times);
+% TauNa=rdmds('TAUYave',times);
+% save('vorticityDiagnostics8day.mat')
 %%
-load('momentumDiagnostics11day.mat')
-vort=rdmds('VortAve',times);
+%load('vorticityDiagnostics8day.mat')
+%vort=rdmds('VortAve',times);
 
-sizeUtend=size(Utend)
+%sizeUtend=size(Utend)
 load('edgesWAGeuler2017b.mat','inWag','dInterface','XC','YC','*Coast')
 inWag1=inWag(:,:,1);
 
@@ -20,7 +49,7 @@ xcm=(XC-xmin).*111000.*cosd(YC);
 ycm=(YC-ymin).*111000;
 g=9.81;
 
-nt=11;
+nt=8;
 
 dZ(1,1,1:46)=diff(dInterface);
 cellVol=repmat(rAw,[1 1 46]).*hFacW.*repmat(dZ,[700 200 1]);
@@ -28,12 +57,17 @@ cellVolU=repmat(cellVol,[1 1 1 nt]);
 cellVol=repmat(rAs,[1 1 46]).*hFacS.*repmat(dZ,[700 200 1]);
 cellVolV=repmat(cellVol,[1 1 1 nt]);
 %% prep variables
+%curl of gradient is zero, so don't add surface gradient in here for
+%vorticity terms, only for momentum terms
 dhdx=zeros([700 200 1 nt]);
 dhdy=dhdx;
 dhdx(2:end,:,1,:)=-g*(SSH(2:end,:,:)-SSH(1:end-1,:,:))./repmat(DXC(1:end-1,:),[1 1 nt]);
 UP=UdPdx+repmat(dhdx,[1 1 46 1]);
 dhdy(:,2:end,1,:)=-g*(SSH(:,2:end,:)-SSH(:,1:end-1,:))./repmat(DYC(:,1:end-1),[1 1 nt]);
 VP=VdPdy+repmat(dhdy,[1 1 46 1]);
+for i=1:8
+curlgradH(:,:,i)=squeeze(DYC(2:end,2:end).*(dhdy(2:end,2:end,1,i)-dhdy(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(dhdx(2:end,2:end,1,i)-dhdx(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
+end
 
 UDif2a=(VisZU(:,:,2:end,:)-VisZU(:,:,1:end-1,:))./cellVolU(:,:,1:end-1,:);
 VDif2a=(VisZV(:,:,2:end,:)-VisZV(:,:,1:end-1,:))./cellVolV(:,:,1:end-1,:);
@@ -50,13 +84,13 @@ AdvV1=AdvV-VCori;
 Utend=Utend./86400; 
 Vtend=Vtend./86400;
 
-clear  UdPdx VdPdy Vis* cellVol*
+clear Vis* cellVol*
 %% taking the curl mitgcm style
 load('distancesAreas.mat','raz','dxc','dyc')
 rAz=reshape(raz,[700 200]);
 DXC=reshape(dxc,[700 200]);
 DYC=reshape(dyc,[700 200]);
-for i=1:8
+for i=1:nt
 hold1=(DYC(2:end,2:end).*(AdvV(2:end,2:end,1,i)-AdvV(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(AdvU(2:end,2:end,1,i)-AdvU(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
 cAdv(:,:,i)=hold1;
 hold1=(DYC(2:end,2:end).*(AdvV1(2:end,2:end,1,i)-AdvV1(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(AdvU1(2:end,2:end,1,i)-AdvU1(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
@@ -68,8 +102,12 @@ hold1=(DYC(2:end,2:end).*(VDiss(2:end,2:end,1,i)-VDiss(1:end-1,2:end,1,i))-DXC(2
 cDiss(:,:,i)=hold1;
 hold1=(DYC(2:end,2:end).*(VDif2a(2:end,2:end,1,i)-VDif2a(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(UDif2a(2:end,2:end,1,i)-UDif2a(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
 cDiff(:,:,i)=hold1;
+hold1=(DYC(2:end,2:end).*(VdPdy(2:end,2:end,1,i)-VdPdy(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(UdPdx(2:end,2:end,1,i)-UdPdx(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
+cPclinic(:,:,i)=hold1;
+
 hold1=(DYC(2:end,2:end).*(VP(2:end,2:end,1,i)-VP(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(UP(2:end,2:end,1,i)-UP(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
 cP(:,:,i)=hold1;
+
 
 hold1=(DYC(2:end,2:end).*(Vext(2:end,2:end,1,i)-Vext(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(Uext(2:end,2:end,1,i)-Uext(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
 cWind(:,:,i)=hold1;
@@ -79,9 +117,69 @@ hold1=(DYC(2:end,2:end).*(Vtend(2:end,2:end,1,i)-Vtend(1:end-1,2:end,1,i))-DXC(2
 cTend(:,:,i)=hold1;
 hold1=(DYC(2:end,2:end).*(Vtot1(2:end,2:end,1,i)-Vtot1(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(Utot1(2:end,2:end,1,i)-Utot1(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
 cTot1(:,:,i)=hold1;
+
+hold1=(DYC(2:end,2:end).*(Vsnap(2:end,2:end,1,i)-Vsnap(1:end-1,2:end,1,i))-DXC(2:end,2:end).*(Usnap(2:end,2:end,1,i)-Usnap(2:end,1:end-1,1,i)))./rAz(2:end,2:end);
+cVort(:,:,i)=hold1;
+
+if i>1
+vortTend(:,:,i)=(vortSnap(:,:,1,i)-vortSnap(:,:,1,i-1))./86400;
+end
 end
 
-save('surfaceVorticity2.mat','c*','vort','inWag1','XC','x*','YC','y*','*Coast','DXC','DYC','rAz')
+cPtropic=-cPclinic+cP;
+%vortSnap=squeeze(vortSnap(:,:,1,:));
+%tauN=squeeze(TauNa(:,:,1,:));
+%tauE=squeeze(TauEa(:,:,1,:));
+save('surfaceVorticity8day.mat','c*','inWag1','XC','x*','YC','y*','*Coast','DXC','DYC','rAz','vortTend','vortSnap','TauNa','TauEa')
+%% plot 1
+load('surfaceVorticity8day.mat')
+i=350; j=70;
+figure; plot(squeeze(cAdv(i,j,:))); hold all
+plot(squeeze(cDiss(i,j,:))); plot(squeeze(cWind(i,j,:))); plot(squeeze(cDiff(i,j,:))); plot(squeeze(cP(i,j,:))); 
+plot(squeeze(cAb(i,j,:)))
+plot(squeeze(cTend(i,j,:)),'linewidth',2); plot(squeeze(cTot1(i,j,:)),'--','linewidth',2); plot(squeeze(vortTend(i,j,:)),'--')
+plot(squeeze(cAdv(i,j,:)+cDiss(i,j,:)+cWind(i,j,:)+cDiff(i,j,:)+cPtropic(i,j,:)+cPclinic(i,j,:)+cAb(i,j,:)-cTend(i,j,:)),'linewidth',2)
+plot(squeeze(cPtropic(i,j,:))); plot(squeeze(cPclinic(i,j,:)));
+legend('adv','diss','wind','diff','timestep','tend','tot1','vortTend','tot2','Tropic','Clinic')
+title('1 point')
+
+%these should probably be multiplied by rAz, right?
+figure; plot(squeeze(nansum(nansum(cAdv.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt]))))); hold all
+plot(squeeze(nansum(nansum(cDiss.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt]))))); plot(squeeze(nansum(nansum(cWind.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt]))))); 
+plot(squeeze(nansum(nansum(cDiff.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt]))))); plot(squeeze(nansum(nansum(cP.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt]))))); plot(squeeze(nansum(nansum(cAb.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))));
+plot(squeeze(nansum(nansum(cTend.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))),'linewidth',2); plot(squeeze(nansum(nansum(cTot1.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))),'--','linewidth',2); plot(squeeze(nansum(nansum(vortTend.*repmat(rAz.*inWag1,[1 1 nt])))),'--')
+plot(squeeze(nansum(nansum((cAdv+cDiss+cWind+cDiff+cP+cAb-cTend).*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))),'linewidth',2)
+legend('adv','diss','wind','diff','Press','timestep','tend','tot1','vortTend','tot2')
+title('surface wag vorticity budget by area integral')
+
+figure; plot(squeeze(nansum(nansum(cP.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))));
+hold all
+plot(squeeze(nansum(nansum(cPtropic.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))));
+plot(squeeze(nansum(nansum(cPclinic.*repmat(rAz(2:end,2:end).*inWag1(2:end,2:end),[1 1 nt])))));
+legend('pressure','barotropic part only','baroclinic part only')
+title('vorticity budget pressure term')
+%% circulation integral
+% figure; [cWag,h]=contour(xcm,ycm,inWag1,[1 1]);
+% xWag=cWag(1,2:494); yWag=cWag(2,2:494);
+% vecWag=[xWag(:).';yWag(:).'];
+% vecDS=diff(vecWag,1,2);
+% for i=1:8
+%     uWag(:,:,i)=griddata(xcm,ycm,Usnap(:,:,i),xWag,yWag);
+%     vWag(:,:,i)=griddata(xcm,ycm,Vsnap(:,:,i),xWag,yWag);
+%     tauEwag(:,:,i)=griddata(xcm,ycm,TauEa(:,:,i),xWag,yWag);
+%     tauNwag(:,:,i)=griddata(xcm,ycm,TauNa(:,:,i),xWag,yWag);
+%     hold1=(DYC(2:end,2:end).*(TauNa(2:end,2:end,i)-TauNa(1:end-1,2:end,i))-DXC(2:end,2:end).*(TauEa(2:end,2:end,i)-TauEa(2:end,1:end-1,i)))./rAz(2:end,2:end);
+%     curlWind(:,:,i)=hold1;
+% end
+% vecTau=[reshape(tauEwag(1,1:end-1,:),1,492,8);reshape(tauNwag(1,1:end-1,:),1,492,8)];
+% vecU=[reshape(uWag(1,1:end-1,:),1,492,8);reshape(vWag(1,1:end-1,:),1,492,8)];
+% for i=1:8
+% intUds(i)=sum(dot(vecU(:,:,i),vecDS));
+% intTauDS(i)=sum(dot(vecTau(:,:,i),vecDS));
+% intDelTauDA(i)=squeeze(nansum(nansum(curlWind(:,:,i).*rAz(2:end,2:end).*inWag1(2:end,2:end))));
+% intVortDA(i)=squeeze(nansum(nansum(cVort(:,:,i).*rAz(2:end,2:end).*inWag1(2:end,2:end))));
+% end
+
 %% old
 % %matlab curl requires meshgrid-like coordinates
 % x=0:2000:max(max(xcm));

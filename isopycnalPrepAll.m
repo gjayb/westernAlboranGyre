@@ -2,10 +2,10 @@
 addpath('/nobackup1/gbrett/mStuff')
 load('geometrySpinupSteady.mat');
 dBin=0.5.*dInterface(1:end-1)+0.5.*dInterface(2:end);
-isopycs=[26.3 26.5 26.75 27 27.25 27.5 27.75 28 28.25 28.5 28.75 28.9 29 29.1];
-isopycStr=[263 265 2675 27 2725 275 2775 28 2825 285 2875 289 29 291];
+isopycs=[26.3 26.5 26.75 27 27.5 28 28.5 28.9 29 29.1];
+isopycStr=[263 265 2675 27 275 28 285 289 29 291];
 %%
-for iiso=13:14%1:length(isopycs) 
+for iiso=1:length(isopycs)
     isopyc=isopycs(iiso)
     fnL=strcat('uvwNativeGridIsoDepth',num2str(isopycStr(iiso)),'.mat');
     load(fnL);

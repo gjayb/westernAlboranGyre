@@ -29,7 +29,7 @@ interface1=inflow;
 interface2=inflow;
 umean=zeros([46 426]);
 timeday=8640:8640:3680640;
-for i=1:426
+for i=1:162
     i
     iter=timeday(i); % Iteration number of the model output
     % Reading u-velocity
@@ -51,7 +51,7 @@ end
 %figure; plot(abs(outflow)); title('Outflow in Sv'); xlabel('Days, 1=Nov 1, 2007')
 %figure; plot(interface1); %hold all; plot(interface2); legend('interface1','interface2'); 
 %xlabel('Days, 1=Nov 1, 2007'); title('Depth of Interface, below last inflow')
-save('transportGibraltarDaily.mat')
+save('transportGibraltarDailyNR.mat')
  
 
 

@@ -1,5 +1,5 @@
 %load('saTCtCpSigma162NR.mat', 'Sigma')
-load('tsSigmaSnapshots162NF.mat','Sigma')
+load('tsSigmaSnapshots162NR.mat','Sigma')
 load('geometrySpinupSteady.mat')
 %load('sigmaCT148.mat')
 %size(CT)
@@ -7,11 +7,11 @@ load('geometrySpinupSteady.mat')
 size(Sigma)
 %%
 dBin=0.5.*dInterface(1:end-1)+0.5.*dInterface(2:end);
-isopycs=[26.3 26.5 26.75 27 27.5 28 28.5 28.9 29 29.1];
-isoStr=[263 265 2675 27 275 28 285 289 29 291];
+isopycs=[26.35 26.5 26.75 27 27.25 27.5 27.75 28 28.25 28.5 28.75 28.9 29 29.1];
+isoStr=[2635 265 2675 27 2725 275 2775 28 2825 285 2875 289 29 291];
 
 %depths1=[2.5 3:dBin(end)];
-for iiso=9:10
+for iiso=1:10
     isopyc=isopycs(iiso); %potential density
     nt=162;
     isoDepth=zeros([700 200 nt]);

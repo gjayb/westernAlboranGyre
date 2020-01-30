@@ -17,7 +17,7 @@ heatF=zeros(size(xh));
 heatB=heatF;
 heat=heatF;
 %%
-for t=60:nt %for each time
+for t=1:nt %for each time
     t
     XF=lontrFall(t,:);
     YF=lattrFall(t,:);
@@ -37,11 +37,11 @@ for t=60:nt %for each time
     end
 end
 
-pmanF=heatF./(nt-59);
-pmanB=heatB./(nt-59);
-pman=heat./(nt-59);
+pmanF=heatF./nt;
+pmanB=heatB./nt;
+pman=heat./nt;
 
-fns=strcat('pmanSigma',isoStr,'Int8days60to148.mat');
+fns=strcat('pmanSigma',isoStr,'Int8.mat');
 save(fns,'heat*','pman*','xh','yh')
 
 end %iiso

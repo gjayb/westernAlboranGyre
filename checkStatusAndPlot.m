@@ -149,7 +149,7 @@ end
 %
 SSHave=rdmds('SSHave',NaN);
 %disp(strcat('So far there are ',num2str(nt),' days of data.'))
-figure; contourf(XC,YC,SSHave(:,:,end),-1:0.1:1); shading 'flat'; colorbar;
+figure; contourf(XC,YC,SSHave(:,:,end),[-1:0.1:-0.1 -0.075 -0.05 -0.025 -0.01 0 0.01]); shading 'flat'; colorbar;
 hold all; plot(lonCoast,latCoast,'k')
 fn3=strcat('SSHaveDay',num2str(nt));
 save2pdf(fn3)
@@ -176,15 +176,11 @@ areas2=zeros([nx ny nz nt]);
 
 ini=mod(nt,10);
 days=ini:10:nt;
-if ini==0
-days=[1:8:nt nt];
-end
-
 
 UArot=Uave.*repmat(AngleCS,[1 1 nz nt]) - Vave.*repmat(AngleSN,[1 1 nz nt]);  %U(:,:,:,i).*repmat(AngleCS,[1 1 46]) - V(:,:,:,i).*repmat(AngleSN,[1 1 46]);
 VArot=Uave.*repmat(AngleSN,[1 1 nz nt]) + Vave.*repmat(AngleCS,[1 1 nz nt]); %U(:,:,:,i).*repmat(AngleSN,[1 1 46]) + V(:,:,:,i).*repmat(AngleCS,[1 1 46]);
 
-for i=days
+for i=ini:10:nt
     disp(num2str(i))
     for j=1:nz
         UArot(:,:,j,i) = griddata(XU,YU,UArot(:,:,j,i),XC,YC);
@@ -228,7 +224,7 @@ save2pdf('keDiff')
 close all
 end
 
-figure; plot(days,squeeze(keSeries(1,1,1,days)))
+figure; plot(days,squeeze(keSeries(1,1,1,ini:10:nt)))
 save2pdf('keSeries')
 close all
 

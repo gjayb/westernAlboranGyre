@@ -4,11 +4,11 @@ addpath('../mStuff')
 load('geometrySpinupSteady.mat','XC','YC','*Coast')
 %load('uvwDailyDepth1interpolatedNR.mat', 'XC','YC','u','v','yvel','xvel','tvel','*Coast')
 
-isopycs=[26.3 26.5 26.75 27 27.5 28 28.5 28.9 29 29.1];
-isopycStr=[263 265 2675 27 275 28 285 289 29 291];
-for iiso=1:length(isopycs)
+isopycs=100.*[26.35 26.5 26.75 27 27.25 27.5 27.75 28 28.25 28.5 28.75 28.9 29 29.1];
+isopycStr=[2635 265 2675 27 2725 275 2775 28 2825 285 2875 289 29 291];
+for iiso=10:length(isopycs)
     isopyc=isopycs(iiso)
-    fnL=strcat('uvwIso',num2str(isopycStr(iiso)),'InterpNF.mat');
+    fnL=strcat('uvwIso',num2str(isopycStr(iiso)),'InterpND.mat');
     load(fnL,'U','V','xvel','yvel','tvel','XC','YC','*Coast')
 [nx,ny,nt]=size(U)
 
@@ -77,8 +77,8 @@ disp('entering day loop')
 for j=37;%[9:18 26:57 65:102 107:112 118:127 134:139];%[19:25 58:64 103:106 113:117  128:133];%113:117; %[10 31:1:61] %0:0.5:21
     j
     clear l*tr*
-    t1=86400*(j-14):86400:(j)*86400;
-    t2=(j+14)*86400:-86400:(j)*86400;
+    t1=86400*(j-8):86400:(j)*86400;
+    t2=(j+8)*86400:-86400:(j)*86400;
     options=odeset('RelTol',10^(-10),'AbsTol',10^(-13));
 
 x0f=xinM1(:)';
@@ -200,7 +200,7 @@ disp('convert to lon/lat')
      lontrB=ones(size(x0b)).*xmin+x0b./(111000.*cosd(lattrB));
     
    %fn=strcat('wagBoundaryday',num2str(j),'Iso275int27.mat');
-fn=strcat('wagBoundarySteadyIso',num2str(isopycStr(iiso)),'NF14.mat');
+fn=strcat('wagBoundarySteadyIso',num2str(isopycStr(iiso)),'ND8.mat');
 clear u v
 save(fn,'-v7.3')
    % figure

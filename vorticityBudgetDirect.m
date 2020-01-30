@@ -15,11 +15,6 @@ xum=111111*cosd(YU).*(XU-xmin*ones(size(XU)));
 yum=111111*(YU-ymin*ones(size(YU)));
 xvm=111111*cosd(YV).*(XV-xmin*ones(size(XV)));
 yvm=111111*(YV-ymin*ones(size(YV)));
-dZ(1,1,:)=diff(dInterface);
-DXC=reshape(dxc,[700 200]); DYC=reshape(dyc,[700 200]);
-rAw=reshape(raw,[700 200]); rAs=reshape(ras,[700 200]);
-cellVolU=repmat(rAw,[1 1 46]).*hFacW.*repmat(dZ,[700 200 1]);
-cellVolV=repmat(rAs,[1 1 46]).*hFacS.*repmat(dZ,[700 200 1]);
 %% update inWag with new layers
 %inWag3=inWag(:,:,1).*double(d>200);
 %figure; [c,h]=contour(xm,ym,inWag3(:,:,1),[1 1]);
@@ -30,18 +25,17 @@ cellVolV=repmat(rAs,[1 1 46]).*hFacS.*repmat(dZ,[700 200 1]);
 %edgeWagX=c(1,2:489);
 %edgeWagY=c(2,2:489);
 inWag2=inWag.*hFacW.*hFacS;
-%figure(1); hold all;
-%for i=1:16
-%%inWag2(:,:,i)=inWag(:,:,i).*hFacW(:,:,i).*hFacS(:,:,i);
-%[c,h]=contour(xm,ym,inWag2(:,:,i),[1 1]);
-%np=c(2,1);
-%edgeWagX(i,1:np)=c(1,2:np+1);
-%edgeWagY(i,1:np)=c(2,2:np+1);
-%inside(:,:,i)=inpolygon(xg,yg,edgeWagX(i,1:np),edgeWagY(i,1:np));%&(hFacW(:,:,i)==1)&(hFacS(:,:,i)==1);
-%%hole(:,:,i)=inpolygon(xg,yg,edgeWagX(i,1:np),edgeWagY(i,1:np))&(~inside(:,:,i));
-%end
-%close(1)
-inside=logical(inWag2);
+figure(1); hold all;
+for i=1:16
+%inWag2(:,:,i)=inWag(:,:,i).*hFacW(:,:,i).*hFacS(:,:,i);
+[c,h]=contour(xm,ym,inWag2(:,:,i),[1 1]);
+np=c(2,1);
+edgeWagX(i,1:np)=c(1,2:np+1);
+edgeWagY(i,1:np)=c(2,2:np+1);
+inside(:,:,i)=inpolygon(xg,yg,edgeWagX(i,1:np),edgeWagY(i,1:np));%&(hFacW(:,:,i)==1)&(hFacS(:,:,i)==1);
+%hole(:,:,i)=inpolygon(xg,yg,edgeWagX(i,1:np),edgeWagY(i,1:np))&(~inside(:,:,i));
+end
+close(1)
 insideSize=size(inside)
 %%
 
@@ -88,7 +82,6 @@ openE(1:end-1,:,i)=inside(1:end-1,:,i)&~inside(2:end,:,i);
 openW(1:end-1,:,i)=inside(2:end,:,i)&~inside(1:end-1,:,i);
 end
 sizeON=size(openN)%
-islog=islogical(openN)
 %%
 signs=ones([700 200 16]);
 % signs(hole)=-1;
@@ -100,25 +93,84 @@ signs=ones([700 200 16]);
 % end
 
 %% load momentum terms
-%% diffusion prep
+% load('momentumTendAbSurface.mat')
+% load('momentumAdvDissSurface.mat')
+% load('momentumDiffusionSurface.mat')
+% load('momentumPressureSurface.mat')
+% load('momentumWindForcing.mat')
+% load('vorticitySurface.mat')
+load('momentumBudget14daySplit.mat')
+load('momentumDiagnostics14daySplit.mat')
+UDif2a(isnan(UDif2a))=0;
+VDif2a(isnan(VDif2a))=0;
+% load('uvwDailyNativeNF.mat','U');
+% U=squeeze(U(:,:,1,:));
+% load('uvwDailyNativeNF.mat','V');
+% V=squeeze(V(:,:,1,:));
+%%
 DYU=reshape(dyu,[700 200]);
 DXV=reshape(dxv,[700 200]);
 DYC=reshape(dyc,[700 200]);
 DXC=reshape(dxc,[700 200]);
 rAz=reshape(raz,[700 200]);
 vortLogic=inside;
+%% direct calculations, %.*hFacW(openN) .*hFacW(openS) .*hFacS(openE) .*hFacS(openW)
+% k=1;
+% hfw=hFacW(:,:,k);
+% hfs=hFacS(:,:,k);
+% hfc=hFacC(:,:,k);
+% for i=1:nt
+%     hold1=Utend(:,:,i)/86400;
+%     hold2=Vtend(:,:,i)/86400;
+%     %NB if not surface layer, will need to hold hFac also
+%     tendency(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold1=AbU(:,:,i);
+%     hold2=AbV(:,:,i);
+%     timestep(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold1=AdvU(:,:,i);
+%     hold2=AdvV(:,:,i);
+%     advection(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold1=Uext(:,:,i);
+%     hold2=Vext(:,:,i);
+%     wind(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold1=UDiss(:,:,i);
+%     hold2=VDiss(:,:,i);
+%     dissipation(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold1=UDif2a(:,:,i);
+%     hold2=VDif2a(:,:,i);
+%     diffusion(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold1=UdPdx(:,:,i);
+%     hold2=VdPdy(:,:,i);
+%     pressClin(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     hold3=vort(:,:,i);
+%     vortint(i)=squeeze(nansum(nansum(hold3.*rAz.*double(inside).*hfc)));
+%     %hold1=U(:,:,i);
+%     %hold2=V(:,:,i);
+%     %circ(i)=sum(-hold1(openN).*DXC(openN).*hfw(openN))+sum(hold1(openS).*DXC(openS).*hfw(openS))+sum(-hold2(openW).*DYC(openW).*hfs(openW))+sum(hold2(openE).*DYC(openE).*hfs(openE));
+%     %hold3=vorta(:,:,i);
+%     %vortAInt(i)=squeeze(nansum(nansum(hold3.*rAz.*double(inside).*hfw(:,:,1).*hfs(:,:,1))));
+% end
+% %% test circulation with holes
+% k=9;
+% hfw=hFacW(:,:,k);
+%     hfs=hFacS(:,:,k);
+%     hfc=hFacC(:,:,k);
+%     signs1=signs(:,:,k);%ones(700,200);%
+% for i=1:148
+%     hold1=U(:,:,i);
+%     hold2=V(:,:,i);
+%  circT(i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)).*signs1(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)).*signs1(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)).*signs1(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)).*signs1(openE(:,:,k)));
+%     hold3=vorta(:,:,i);
+%     vortAIntT(i)=squeeze(nansum(nansum(hold3.*rAz.*double(inside(:,:,k)))));%.*hfw.*hfs
+% end
+% figure; plot(diff(circT-vortAIntT)/86400)
+%% diffusion prep
 dZ(1,1,:)=diff(dInterface);
 rAw=reshape(raw,[700 200]);
 rAs=reshape(ras,[700 200]);
 cellVolU=repmat(rAw,[1 1 46]).*hFacW.*repmat(dZ,[700 200 1]);
 cellVolV=repmat(rAs,[1 1 46]).*hFacS.*repmat(dZ,[700 200 1]);
-load('momentumDiagnostics148dayNF2.mat','VisZ*')
-% UDif2a=(VisZU(:,:,2:end,:)-VisZU(:,:,1:end-1,:))./repmat(cellVolU(:,:,1:end-1),[1 1 1 148]);
-% VDif2a=(VisZV(:,:,2:end,:)-VisZV(:,:,1:end-1,:))./repmat(cellVolV(:,:,1:end-1),[1 1 1 148]);
-% UDif2a(isnan(UDif2a))=0;
-% VDif2a(isnan(VDif2a))=0;
-% clear VisZ* cellVol*
-load('momentumDiagnostics148dayNF1.mat','*tend')
 
 %% vorticity budget components, by layer
 
@@ -129,103 +181,57 @@ for k=1:16
     hfc=hFacC(:,:,k);
     signs1=signs(:,:,k);
 for i=1:148%nt
-     hold1=Utend(:,:,k,i)/86400;
-    hold2=Vtend(:,:,k,i)/86400;
-    tendency(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k))); 
-hold1=VisZU(:,:,k,i)./cellVolU(:,:,k); 
-    hold2=VisZV(:,:,k,i)./cellVolV(:,:,k);
-      hold1(isnan(hold1))=0; hold2(isnan(hold2))=0;
-      difftop(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%     hold1=AdvU(:,:,k,i);
+%     hold2=AdvV(:,:,k,i);
+%     advection(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+%     hold1=UDiss(:,:,k,i);
+%     hold2=VDiss(:,:,k,i);
+%     dissipation(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));%
+%     hold1=Utend(:,:,k,i)/86400;
+%     hold2=Vtend(:,:,k,i)/86400;
+%     tendency(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k))); 
+%     hold1=Uext(:,:,k,i); hold2=Vext(:,:,k,i);
+%     windstress(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k))); 
+%     hold1=VisZU(:,:,k,i)./cellVolU(:,:,k); hold2=VisZV(:,:,k,i)./cellVolV(:,:,k);
+%       hold1(isnan(hold1))=0; hold2(isnan(hold2))=0;
+%       difftop(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+%     hold1=VisZU(:,:,k+1,i)./cellVolU(:,:,k); hold2=VisZV(:,:,k+1,i)./cellVolV(:,:,k);
+%       hold1(isnan(hold1))=0; hold2(isnan(hold2))=0;
+%       diffbot(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+%     hold1=UdPdx(:,:,k,i);
+%     hold2=VdPdy(:,:,k,i);
+%     pressClin(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+%     hold1=AbU(:,:,k,i);
+%     hold2=AbV(:,:,k,i);
+%     timestep(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+    hold1=UCori(:,:,k,i);
+    hold2=VCori(:,:,k,i);
+    coriolis(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
-    hold1=VisZU(:,:,k+1,i)./cellVolU(:,:,k); hold2=VisZV(:,:,k+1,i)./cellVolV(:,:,k);
-    hold1(isnan(hold1))=0; hold2(isnan(hold2))=0;
-      diffbot(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
-end
-end
-clear Utend Vtend UDif2a VDif2a
-
-load('momentumDiagnostics148dayNF1.mat','*Diss','Adv*')
-
-for k=1:16
-    k
-    hfw=hFacW(:,:,k);
-    hfs=hFacS(:,:,k);
-    hfc=hFacC(:,:,k);
-    signs1=signs(:,:,k);
-    
-   for i=1:148%nt
-    
-    hold1=AdvU(:,:,k,i);
-    hold2=AdvV(:,:,k,i);
-    advection(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
-    hold1=UDiss(:,:,k,i);
-    hold2=VDiss(:,:,k,i);
-    dissipation(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));%
-   end
-end
-clear AdvU AdvV UDiss VDiss
-
-load('momentumDiagnostics148dayNF2.mat')
-clear VisZU VisZV
-load('momentumCori.mat')
-for k=1:16
-    k
-    hfw=hFacW(:,:,k);
-    hfs=hFacS(:,:,k);
-    hfc=hFacC(:,:,k);
-    signs1=signs(:,:,k);
-    
-   for i=1:148%nt
-              hold1=Uext(:,:,k,i); hold2=Vext(:,:,k,i);
-              windstress(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k))); 
- % hold1=VisZU(:,:,k+1,i)./cellVolU(:,:,k); hold2=VisZV(:,:,k+1,i)./cellVolV(:,:,k);
-         hold1=UdPdx(:,:,k,i);
-    hold2=VdPdy(:,:,k,i);
-    pressClin(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
-hold1=UCori(:,:,k,i); hold2=VCori(:,:,k,i);
-coriolis(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
-
-   end
-end
-clear Uext Vext UdPdx VdPdy UCori VCori
-load('momentumDiagnostics148dayNF3.mat')
-clear SSH
-for k=1:16
-    k
-    hfw=hFacW(:,:,k);
-    hfs=hFacS(:,:,k);
-    hfc=hFacC(:,:,k);
-    signs1=signs(:,:,k);
-    
-   for i=1:148%nt
-           hold1=AbU(:,:,k,i);
-    hold2=AbV(:,:,k,i);
-    timestep(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
- hold1=Usd(:,:,k,i);
-    hold2=Vsd(:,:,k,i);
-    sidedrag(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
-hold1=Ubt(:,:,k,i);
-    hold2=Vbt(:,:,k,i);
-    botdrag(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
-        +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+% hold1=Usd(:,:,k,i);
+%     hold2=Vsd(:,:,k,i);
+%     sidedrag(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
+% hold1=Ubt(:,:,k,i);
+%     hold2=Vbt(:,:,k,i);
+%     botdrag(k,i)=sum(-hold1(openN(:,:,k)).*DXC(openN(:,:,k)).*hfw(openN(:,:,k)))+sum(hold1(openS(:,:,k)).*DXC(openS(:,:,k)).*hfw(openS(:,:,k)))...
+%         +sum(-hold2(openW(:,:,k)).*DYC(openW(:,:,k)).*hfs(openW(:,:,k)))+sum(hold2(openE(:,:,k)).*DYC(openE(:,:,k)).*hfs(openE(:,:,k)));
 end
 
 end
-clear Ubt Usd AbU Vbt Vsd AbV
-disp('saving')
-save('vorticityBudget2D148.mat')
+%disp('saving')
+%save('vorticityBudget2Ds.mat')
 %% difftop(1,:)=-windstress;
 %%
-runthis=false
+runthis=true
 if runthis
 for i=[2 9]%6:15
 % figure; plot(-tendency(i,:),'k','linewidth',2); hold all; plot(-difftop(i,:),'linewidth',2);plot(diffbot(i,:),'linewidth',2);
@@ -251,7 +257,7 @@ end
 % plot(advection,'linewidth',2);plot(pressure,'linewidth',2);plot(timestep,'linewidth',2);
 % plot(-tendency+wind+dissipation+advection+timestep+pressure+diffusion,'g--','linewidth',2)
 % legend('-d/dt','wind','vertical diffusion','dissipation','advection','full pressure','timestep','total')
-%%
+%
 figure; plot(-sum(tendency,1),'k','linewidth',2); hold all; plot(windstress,'linewidth',2); plot(sum(diffbot,1)-sum(difftop(2:6,:),1),'linewidth',2)
 plot(sum(advection,1),'linewidth',2); plot(sum(dissipation,1),'linewidth',2); %plot(sum(pressClin,1)); plot(sum(timestep,1))
 plot(-sum(tendency,1)+windstress+sum(diffbot,1)-sum(difftop(2:6,:),1)+sum(advection,1)+sum(dissipation,1)+sum(pressClin,1)+sum(timestep,1),'g--','linewidth',2)
@@ -262,9 +268,10 @@ ylabel('m^2/s, negative speeds up gyre','fontsize',12)
 set(gca,'fontsize',12)
 axis tight
 %% depth-integrated time series
-weights=repmat(squeeze(dZ(1:16)),[1 148]);
+nt=14;
+weights=repmat(squeeze(dZ(1:16)),[1 nt]);
 figure; plot(-sum(weights.*tendency,1),'linewidth',1.5); hold all; %plot(5.*windstress,'linewidth',1.5); 
-plot(sum(weights.*diffbot,1)-sum(weights(:,:).*difftop(:,:),1),'linewidth',1.5)
+plot(sum(weights.*diffbot,1)-sum(weights(2:16,:).*difftop(2:16,:),1),'linewidth',1.5)
 plot(sum(weights.*advection,1),'linewidth',1.5); plot(sum(weights.*dissipation,1),'linewidth',1.5); %plot(sum(pressClin,1)); plot(sum(timestep,1))
 plot(-sum(weights.*tendency,1)+5.*windstress+sum(weights.*diffbot,1)-sum(weights(2:16,:).*difftop(2:16,:),1)+sum(weights.*advection,1)+sum(weights.*dissipation,1)+sum(weights.*pressClin,1)+sum(weights.*timestep,1),'k','linewidth',1.5)
 legend('-d/dt','windstress and diffusion','advection','dissipation','total')
@@ -273,6 +280,88 @@ xlabel('days','fontsize',12)
 ylabel('m^3/s^2, negative speeds up gyre','fontsize',12)
 set(gca,'fontsize',12)
 axis tight
+%% drag and lateral separated out
+alldrag=sidedrag+botdrag;
+alldrag(alldrag<0)=0;
+latdiff=dissipation-alldrag;
+weights=repmat(squeeze(dZ(1:16)),[1 nt]);
+figure; plot(-sum(weights.*tendency,1),'linewidth',1.5); hold all; %plot(5.*windstress,'linewidth',1.5); 
+plot(sum(weights.*diffbot,1)-sum(weights.*difftop,1),'linewidth',1.5)
+plot(sum(weights.*advection,1),'linewidth',1.5); plot(sum(weights.*(latdiff),1),'linewidth',1.5); %plot(sum(pressClin,1)); plot(sum(timestep,1))
+plot(sum(weights.*(alldrag),1),'linewidth',1.5);
+legend('-d\Gamma/dt','windstress and vert. diffusion','advection','horiz. diffusion','drag')
+title('Depth-integrated vorticity budget, 185m, Euler WAG','fontsize',14)
+xlabel('days','fontsize',12)
+ylabel('m^3/s^2, negative speeds up gyre','fontsize',12)
+set(gca,'fontsize',12)
+axis tight
+%%
+figure;plot(sum(weights.*dissipation,1),'linewidth',1.5); 
+hold all
+plot(sum(weights.*sidedrag,1),'linewidth',1.5); 
+plot(sum(weights.*botdrag,1),'linewidth',1.5); 
+plot(sum(weights.*dissipation,1)-sum(weights.*sidedrag,1)-sum(weights.*botdrag,1),'linewidth',1.5); 
+legend('diss tot','side','bot','lateral')
+%
+figure;plot(sum(weights.*dissipation,1),'linewidth',1.5); 
+hold all
+plot(sum(weights.*sidedrag,1)+sum(weights.*botdrag,1),'linewidth',1.5); 
+plot(sum(weights.*dissipation,1)-sum(weights.*sidedrag,1)-sum(weights.*botdrag,1),'linewidth',1.5); 
+legend('diss tot','drag','lateral')
+%%
+meanTermsC={'-d/dt Circ.','advection','wind','vert. diffusion','horiz. diffusion','drag','total'};
+meanTerms=[mean(-sum(weights.*tendency,1)),mean(sum(weights.*advection,1)),mean(sum(weights.*windstress,1)),mean(sum(diffbot.*weights,1)-sum(weights(2:16,:).*difftop(2:16,:),1)),mean(sum(weights.*latdiff,1)),mean(sum(weights.*alldrag,1)),mean(sum(weights.*(-tendency+pressClin+advection+dissipation+diffbot-difftop),1))];
+figure; bar(meanTerms)
+set(gca,'XTickLabel',meanTermsC)
+title('Mean Euler WAG Vorticity Budget','fontsize',14)
+set(gca,'fontsize',14)
+ylabel('m^4/s^2','fontsize',14)
+alltermshold(:,1)=-sum(weights.*tendency,1);
+alltermshold(:,2)=sum(weights.*advection,1);
+alltermshold(:,3)=sum(weights.*windstress,1);
+alltermshold(:,4)=sum(diffbot.*weights,1)-sum(weights(2:16,:).*difftop(2:16,:),1);
+alltermshold(:,5)=sum(weights.*latdiff,1);
+alltermshold(:,6)=sum(weights.*alldrag,1);
+alltermshold(:,7)=sum(weights.*(-tendency+pressClin+advection+dissipation+diffbot-difftop),1);
+hold all;
+plot(1:7,mean(alltermshold(1:30,:),1),'r*')
+plot(1:7,mean(alltermshold(31:60,:),1),'r*')
+plot(1:7,mean(alltermshold(61:90,:),1),'r*')
+plot(1:7,mean(alltermshold(91:120,:),1),'r*')
+plot(1:7,mean(alltermshold(119:148,:),1),'r*')
+
+
+%%
+zBin=-0.5*(dInterface(1:16)+dInterface(2:17));
+allterms1(:,:,1)=tendency; allterms1(:,:,2)=diffbot-difftop; allterms1(:,:,3)=advection; allterms1(:,:,4)=latdiff;%dissipation-sidedrag-botdrag;
+allterms1(:,:,5)=alldrag;%sidedrag+botdrag;
+%
+figure; plot(squeeze(mean(abs(allterms1),2)),zBin,'linewidth',2);
+legend('d\Gamma/dt','wind and vert. diffusion','advection','horiz. diffusion','drag')
+axis([0 0.3 -185 0])
+set(gca,'fontsize',12)
+ylabel('Cell center depth, m')
+xlabel('Vorticity budget term magnitudes, m^2/s^2','fontsize',12)
+title('Depth structure of vorticity budget, mean magnitudes','fontsize',14)
+
+figure; plot(squeeze(mean((allterms1),2)),zBin,'linewidth',2);
+legend('d\Gamma/dt','wind and vert. diffusion','advection','horiz. diffusion','drag')
+axis tight
+set(gca,'fontsize',12)
+ylabel('Cell center depth, m')
+xlabel('Vorticity budget terms, m^2/s^2','fontsize',12)
+title('Depth structure of vorticity budget, 2-week mean','fontsize',14)
+%%
+for i=1:10:148
+    figure; plot(squeeze(allterms1(:,i,:)),zBin,'linewidth',2);
+legend('d/dt','v diffusion','advection','h diffusion','drag')
+axis tight
+set(gca,'fontsize',12)
+ylabel('Cell center depth, m')
+xlabel('Vorticity budget terms, m^2/s^2','fontsize',12)
+title(num2str(i),'fontsize',14)
+    
+end
 %%
 figure; plot(-sum(weights.*tendency,1),'k','linewidth',2); hold all;  plot(sum(weights.*diffbot,1)-sum(weights.*difftop,1),'linewidth',2)
 plot(sum(weights.*advection,1),'linewidth',2); plot(sum(weights.*dissipation,1),'linewidth',2); %plot(sum(pressClin,1)); plot(sum(timestep,1))
@@ -345,9 +434,9 @@ legend('-d/dt','windstress','diffusion','advection','dissipation','total')
 
 %% monthly means
 for i=1:4
-    figure; bar(1:16, squeeze(mean(allterms(:,1+(i-1)*30:i*30,:),2)))
+    figure; bar(1:16, squeeze(mean(allterms1(:,1+(i-1)*30:i*30,:),2)))
 axis tight
-legend('d/dt','vertical diffusion','advection','drag')
+legend('d\Gamma/dt','wind and vert. diffusion','advection','horiz. diffusion','drag')
 t1=strcat('Mean Vorticity Terms, 16 layers, month ',num2str(i));
 title(t1,'fontsize',14)
 set(gca,'xtick',1:16)
@@ -355,9 +444,9 @@ set(gca,'xticklabel',{'0-5m','5-11m','11-17m','17-24m','24-31m','31-39m','39-48m
 set(gca,'fontsize',12)
 ylabel('m^2/s, negative speeds up gyre','fontsize',12)
 
-figure; bar(1:16, squeeze(mean(abs(allterms(:,1+(i-1)*30:i*30,:)),2)))
+figure; bar(1:16, squeeze(mean(abs(allterms1(:,1+(i-1)*30:i*30,:)),2)))
 axis tight
-legend('d/dt','vertical diffusion','advection','drag')
+legend('d\Gamma/dt','wind and vert. diffusion','advection','horiz. diffusion','drag')
 t1=strcat('Mean Magnitudes of Vorticity Terms, 16 layers, month ',num2str(i));
 title(t1,'fontsize',14)
 set(gca,'xtick',1:16)
@@ -368,9 +457,9 @@ end
 
 i=5;
 
-  figure; bar(1:16, squeeze(mean(allterms(:,1+(i-1)*30:end,:),2)))
+  figure; bar(1:16, squeeze(mean(allterms1(:,1+(i-1)*30:end,:),2)))
 axis tight
-legend('d/dt','vertical diffusion','advection','drag')
+legend('d\Gamma/dt','wind and vert. diffusion','advection','horiz. diffusion','drag')
 t1=strcat('Mean Vorticity Terms, 16 layers, month ',num2str(i));
 title(t1,'fontsize',14)
 set(gca,'xtick',1:16)
@@ -378,9 +467,9 @@ set(gca,'xticklabel',{'0-5m','5-11m','11-17m','17-24m','24-31m','31-39m','39-48m
 set(gca,'fontsize',12)
 ylabel('m^2/s, negative speeds up gyre','fontsize',12)
 
-figure; bar(1:16, squeeze(mean(abs(allterms(:,1+(i-1)*30:end,:)),2)))
+figure; bar(1:16, squeeze(mean(abs(allterms1(:,1+(i-1)*30:end,:)),2)))
 axis tight
-legend('d/dt','vertical diffusion','advection','drag')
+legend('d\Gamma/dt','wind and vert. diffusion','advection','horiz. diffusion','drag')
 t1=strcat('Mean Magnitudes of Vorticity Terms, 16 layers, month ',num2str(i));
 title(t1,'fontsize',14)
 set(gca,'xtick',1:16)

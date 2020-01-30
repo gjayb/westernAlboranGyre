@@ -1,35 +1,35 @@
 %%load variables
- times=8640:8640:(148*8640)
- Utend=rdmds('Utend',times);
- sizeUtend=size(Utend)
- Vtend=rdmds('Vtend',times);
- UDiss=rdmds('UDiss',times);
- VDiss=rdmds('VDiss',times);
- AdvU=rdmds('AdvU',times);
- AdvV=rdmds('AdvV',times);
- disp('saving diagnostics')
- save('momentumDiagnostics148dayNF1.mat','-v7.3')
- clear
- 
- times=8640:8640:(148*8640)
- UdPdx=rdmds('UdPdx',times);
- VdPdy=rdmds('VdPdy',times);
- Uext=rdmds('Uext',times);
- Vext=rdmds('Vext',times);
- VisZU=rdmds('ViscZiU',times);
- VisZV=rdmds('ViscZiV',times);
- disp('saving diagnostics')
- save('momentumDiagnostics148dayNF2.mat','-v7.3')
- clear
- 
- UCori=rdmds('UCori',times);
- VCori=rdmds('VCori',times);
+% times=8640:8640:(148*8640)
+% Utend=rdmds('Utend',times);
+% sizeUtend=size(Utend)
+% Vtend=rdmds('Vtend',times);
+% UDiss=rdmds('UDiss',times);
+% VDiss=rdmds('VDiss',times);
+% AdvU=rdmds('AdvU',times);
+% AdvV=rdmds('AdvV',times);
+% disp('saving diagnostics')
+% save('momentumDiagnostics148dayNF1.mat','-v7.3')
+% clear
 % 
- times=8640:8640:(148*8640)
- SSH=rdmds('SSHave',times);
- AbU=rdmds('ABU',times);
- AbV=rdmds('ABV',times);
- 
+% times=8640:8640:(148*8640)
+% UdPdx=rdmds('UdPdx',times);
+% VdPdy=rdmds('VdPdy',times);
+% Uext=rdmds('Uext',times);
+% Vext=rdmds('Vext',times);
+% VisZU=rdmds('ViscZiU',times);
+% VisZV=rdmds('ViscZiV',times);
+% disp('saving diagnostics')
+% save('momentumDiagnostics148dayNF2.mat','-v7.3')
+% clear
+% 
+% %UCori=rdmds('UCori',times);
+% %VCori=rdmds('VCori',times);
+% 
+% times=8640:8640:(148*8640)
+% SSH=rdmds('SSHave',times);
+% AbU=rdmds('ABU',times);
+% AbV=rdmds('ABV',times);
+% 
 % %AdvXU=rdmds('AdvXU',times);%zero
 % %AdvYU=rdmds('AdvYU',times);%zero
 % %AdvZU=rdmds('AdvZU',times);%zero
@@ -41,10 +41,10 @@
 % %AdvVortV=rdmds('AdvVortV',times);%nonzero!
 % %AdvReV=rdmds('AdvReV',times);%wasn't saved whoops
 % 
-  KppK=rdmds('KppVis',times);
- disp('saving diagnostics')
- save('momentumDiagnostics148dayNF3.mat','-v7.3')
- clear
+% %KppK=rdmds('KppVis',times);
+% disp('saving diagnostics')
+% save('momentumDiagnostics148dayNF3.mat','-v7.3')
+% clear
 %%
 
 %inWag=zeros(size(inWag));
@@ -349,69 +349,99 @@ end
 % %legend('output u','balance u','output v','balance v')
 
 %%
-% load('momentumCori');
-% for i=1:148
-% uCori(i)=squeeze(nansum(nansum(nansum(UCori(:,:,:,i).*double(inWag).*cellVolU))));
-% end
-% clear UCori
-% 
-% for i=1:148
-% vCori(i)=squeeze(nansum(nansum(nansum(VCori(:,:,:,i).*double(inWag).*cellVolV))));
-% end
-% clear VCori
+load('momentumCori');
+for i=1:148
+uCori(1:46,i)=squeeze(nansum(nansum((UCori(:,:,:,i).*double(inWag).*cellVolU))));
+end
+clear UCori
+
+for i=1:148
+vCori(1:46,i)=squeeze(nansum(nansum((VCori(:,:,:,i).*double(inWag).*cellVolV))));
+end
+clear VCori
 %%
-% %VPress2-dVdt+VAdvec+VDif1+VDif2+vAB+vSurf=0
-% VPress2=dVdt-VAdvec-VDif1-VDif2-vAB-vSurf;
-% figure; plot(-dUdt,'linewidth',2); hold all
-% plot(UAdvec-uCori.','linewidth',2); plot(uCori,'linewidth',2); plot(UPress1,'linewidth',2);
-% plot(uSurf,'linewidth',2); plot(UDif1,'linewidth',2); plot(UDif2,'linewidth',2); plot(uAB,'linewidth',2)
-% %plot(UAdvec+UDif1+UDif2+UPress1+uSurf+uAB,'r--','linewidth',2)
-% plot(-dUdt+(UAdvec+UDif1+UDif2+UPress1+uAB+uSurf),'m--','linewidth',2)
-% legend('-dU/dt','Advection','Coriolis','Pressure term','Surface','Dissipation','Diffusion','Timestep','Total')
-% title('U momentum','fontsize',14)
-% set(gca,'fontsize',12)
-% xlabel('simulation day')
-% ylabel('volume-integrated momentum budget terms, m^4/s^2')
-% axis tight
-% 
-% figure; plot(-dVdt,'linewidth',2); hold all
-% plot(VAdvec-vCori.','linewidth',2); plot(vCori,'linewidth',2); plot(VPress2,'linewidth',2); 
-% plot(vSurf,'linewidth',2); plot(VDif1,'linewidth',2);plot(VDif2,'linewidth',2);plot(vAB,'linewidth',2);
-% %plot(VAdvec+VDif1+VDif2+VPress1+vAB+vSurf,'r--','linewidth',2)
-% plot(-dVdt+VAdvec+VDif1+VDif2+VPress2+vAB+vSurf,'m--','linewidth',2)
-% legend('dV/dt','Advection','Coriolis','Pressure term 1','Surface','Dissipation','Diffusion','Timestep','Total')
-% title('V momentum','fontsize',14)
-% set(gca,'fontsize',12)
-% xlabel('simulation day')
-% ylabel('volume-integrated momentum budget terms, m^4/s^2')
-% axis tight
-% 
-% UPress2=dUdt-UAdvec-UDif1-UDif2-uAB-uSurf;
-% figure; plot(dUdt,'linewidth',2); hold all
-% plot(uCori.'+UPress2,'linewidth',2); plot(UAdvec-uCori.','linewidth',2);
-% %plot(UPress0); %plot(UPress2); %plot(UAdvec/10); %plot(Ufv);
-% plot(uSurf,'linewidth',2); plot(UDif1,'linewidth',2); %plot(UDif2); plot(uAB)
-% %plot(UAdvec+UDif1+UDif2+UPress1+uSurf+uAB,'r--','linewidth',2)
-% %plot(-dUdt+(UAdvec+UDif1+UDif2+UPress1+uAB+uSurf),'m--','linewidth',2)
-% legend('dU/dt','Ageostrophy','Advection','Surface','Dissipation')%,'Diffusion','Timestep','Total')
-% title('U momentum','fontsize',14)
-% set(gca,'fontsize',12)
-% xlabel('simulation day')
-% ylabel('volume-integrated momentum budget terms, m^4/s^2')
-% axis tight
-% 
-% figure; plot(dVdt,'linewidth',2); hold all
-% plot(vCori.'+VPress2,'linewidth',2); %plot(VPress2); %plot(VAdvec/10); %plot(Vfu);
-% plot(VAdvec-vCori.','linewidth',2);
-% plot(vSurf,'linewidth',2); plot(VDif1,'linewidth',2);%plot(VDif2);plot(vAB);
-% %plot(VAdvec+VDif1+VDif2+VPress1+vAB+vSurf,'r--','linewidth',2)
-% %plot(-dVdt+VAdvec+VDif1+VDif2+VPress2+vAB+vSurf,'m--','linewidth',2)
-% legend('dV/dt','Ageostrophy','Advection','Surface','Dissipation')
-% title('V momentum','fontsize',14)
-% set(gca,'fontsize',12)
-% xlabel('simulation day')
-% ylabel('volume-integrated momentum budget terms, m^4/s^2')
-% axis tight
+%VPress2-dVdt+VAdvec+VDif1+VDif2+vAB+vSurf=0
+VPress2=dVdt-VAdvec-VDif1-VDif2-vAB-vSurf;
+figure; plot(-dUdt,'linewidth',2); hold all
+plot(UAdvec-uCori.','linewidth',2); plot(uCori,'linewidth',2); plot(UPress1,'linewidth',2);
+plot(uSurf,'linewidth',2); plot(UDif1,'linewidth',2); plot(UDif2,'linewidth',2); plot(uAB,'linewidth',2)
+%plot(UAdvec+UDif1+UDif2+UPress1+uSurf+uAB,'r--','linewidth',2)
+plot(-dUdt+(UAdvec+UDif1+UDif2+UPress1+uAB+uSurf),'m--','linewidth',2)
+legend('-dU/dt','Advection','Coriolis','Pressure term','Surface','Dissipation','Diffusion','Timestep','Total')
+title('U momentum','fontsize',14)
+set(gca,'fontsize',12)
+xlabel('simulation day')
+ylabel('volume-integrated momentum budget terms, m^4/s^2')
+axis tight
 
+figure; plot(-dVdt,'linewidth',2); hold all
+plot(VAdvec-vCori.','linewidth',2); plot(vCori,'linewidth',2); plot(VPress2,'linewidth',2); 
+plot(vSurf,'linewidth',2); plot(VDif1,'linewidth',2);plot(VDif2,'linewidth',2);plot(vAB,'linewidth',2);
+%plot(VAdvec+VDif1+VDif2+VPress1+vAB+vSurf,'r--','linewidth',2)
+plot(-dVdt+VAdvec+VDif1+VDif2+VPress2+vAB+vSurf,'m--','linewidth',2)
+legend('dV/dt','Advection','Coriolis','Pressure term 1','Surface','Dissipation','Diffusion','Timestep','Total')
+title('V momentum','fontsize',14)
+set(gca,'fontsize',12)
+xlabel('simulation day')
+ylabel('volume-integrated momentum budget terms, m^4/s^2')
+axis tight
 
+UPress2=dUdt-UAdvec-UDif1-UDif2-uAB-uSurf;
+figure; plot(dUdt,'linewidth',2); hold all
+plot(uCori.'+UPress2,'linewidth',2); plot(UAdvec-uCori.','linewidth',2);
+%plot(UPress0); %plot(UPress2); %plot(UAdvec/10); %plot(Ufv);
+plot(uSurf,'linewidth',2); plot(UDif1,'linewidth',2); %plot(UDif2); plot(uAB)
+%plot(UAdvec+UDif1+UDif2+UPress1+uSurf+uAB,'r--','linewidth',2)
+%plot(-dUdt+(UAdvec+UDif1+UDif2+UPress1+uAB+uSurf),'m--','linewidth',2)
+legend('dU/dt','Ageostrophy','Advection','Surface','Dissipation')%,'Diffusion','Timestep','Total')
+title('U momentum','fontsize',14)
+set(gca,'fontsize',12)
+xlabel('simulation day')
+ylabel('volume-integrated momentum budget terms, m^4/s^2')
+axis tight
 
+figure; plot(dVdt,'linewidth',2); hold all
+plot(vCori.'+VPress2,'linewidth',2); %plot(VPress2); %plot(VAdvec/10); %plot(Vfu);
+plot(VAdvec-vCori.','linewidth',2);
+plot(vSurf,'linewidth',2); plot(VDif1,'linewidth',2);%plot(VDif2);plot(vAB);
+%plot(VAdvec+VDif1+VDif2+VPress1+vAB+vSurf,'r--','linewidth',2)
+%plot(-dVdt+VAdvec+VDif1+VDif2+VPress2+vAB+vSurf,'m--','linewidth',2)
+legend('dV/dt','Ageostrophy','Advection','Surface','Dissipation')
+title('V momentum','fontsize',14)
+set(gca,'fontsize',12)
+xlabel('simulation day')
+ylabel('volume-integrated momentum budget terms, m^4/s^2')
+axis tight
+
+%% load('momentumBudget148dayNFdepth.mat')
+
+VPress=dVdt(1:20,:)-VAdvec(1:20,:)-VDif1(1:20,:)-VDif2(1:20,:)-vAB(1:20,:)-vSurf(1:20,:);
+UPress=dUdt(1:20,:)-UAdvec(1:20,:)-UDif1(1:20,:)-UDif2(1:20,:)-uAB(1:20,:)-uSurf(1:20,:);
+zBin=-0.5*(dInterface(1:end-1)+dInterface(2:end));
+
+figure; plot(mean(dVdt,2),zBin,'linewidth',2); hold all
+plot(mean(vCori(1:20,:)+VPress,2),zBin(1:20),'linewidth',2); 
+plot(mean(VAdvec-vCori,2),zBin,'linewidth',2); %plot(mean(vCori,2),zBin,'linewidth',2); plot(mean(VPress,2),zBin(1:20),'linewidth',2);
+plot(mean(vSurf(1:20,:)+VDif2(1:20,:),2),zBin(1:20),'linewidth',2); plot(mean(VDif1,2),zBin,'--','linewidth',2); plot(mean(uAB,2),zBin,':','linewidth',2)
+legend('dV/dt','Ageostrophic','Advection','Wind and V. Diffusion','Drag and H. Diffusion','Timestep')
+title('Meridional Momentum Budget Mean','fontsize',14)
+set(gca,'fontsize',12)
+ylabel('Depth, m')
+xlabel('volume-integrated momentum budget terms, m^4/s^2')
+ylim([-200 0])
+% figure; plot(mean(abs(dVdt),2),zBin); hold all
+% plot(mean(abs(VAdvec-vCori),2),zBin); plot(mean(abs(vCori),2),zBin); plot(mean(abs(VPress),2),zBin(1:20));
+% plot(mean(abs(vSurf(1:20,:)+VDif2(1:20,:)),2),zBin(1:20)); plot(mean(abs(VDif1),2),zBin); plot(mean(abs(uAB),2),zBin)
+% legend('dV/dt','Advection','Coriolis','Pressure','Windstress and Vertical Diffusion','Drag and Horizontal Diffusion','Timestep')
+% title('Meridional Momentum Budget Mean Magnitudes')
+
+figure; plot(mean(dUdt,2),zBin,'linewidth',2); hold all
+plot(mean(uCori(1:20,:)+UPress,2),zBin(1:20),'linewidth',2);
+plot(mean(UAdvec-uCori,2),zBin,'linewidth',2); %plot(mean(uCori,2),zBin,'linewidth',2); plot(mean(UPress,2),zBin(1:20),'linewidth',2);
+plot(mean(uSurf(1:20,:)+UDif2(1:20,:),2),zBin(1:20),'linewidth',2); plot(mean(UDif1,2),zBin,'--','linewidth',2); plot(mean(uAB,2),zBin,':','linewidth',2)
+legend('dV/dt','Ageostrophic','Advection','Wind and V. Diffusion','Drag and H. Diffusion','Timestep')
+title('Zonal Momentum Budget Mean','fontsize',14)
+set(gca,'fontsize',12)
+ylabel('Depth, m')
+xlabel('volume-integrated momentum budget terms, m^4/s^2')
+ylim([-200 0])
